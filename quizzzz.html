@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Money Pit Stop</title>
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{min-height:100vh;background:linear-gradient(160deg,#0A3D22 0%,#062016 100%);font-family:'League Spartan','Inter',sans-serif;padding-top:56px;color:#E8E6E0;}
+#header{position:fixed;top:0;left:0;right:0;z-index:100;background:#0D4A2A;border-bottom:2px solid #1A6B3C;display:flex;align-items:center;gap:12px;padding:10px 24px;}
+#header span{color:#E8E6E0;font-weight:900;font-size:13px;letter-spacing:3px;text-transform:uppercase;}
+.screen{display:none;max-width:600px;margin:0 auto;padding:40px 20px;}
+.screen.active{display:flex;flex-direction:column;align-items:center;}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(232,230,224,0.12);border-radius:16px;padding:24px;width:100%;}
+.btn-main{background:#E8E6E0;color:#0D4A2A;border:none;border-radius:10px;padding:15px 44px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:2px;text-transform:uppercase;font-family:'League Spartan',sans-serif;box-shadow:0 6px 28px rgba(13,74,42,0.5);transition:transform 0.15s,opacity 0.15s;}
+.btn-main:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-next{margin-top:18px;width:100%;background:#E8E6E0;color:#0D4A2A;border:none;border-radius:10px;padding:15px;font-size:13px;font-weight:900;cursor:pointer;letter-spacing:2px;text-transform:uppercase;font-family:'League Spartan',sans-serif;display:none;}
+#screen-intro h1{font-size:clamp(28px,7vw,46px);font-weight:900;letter-spacing:-1px;color:#E8E6E0;line-height:1.1;text-transform:uppercase;text-align:center;margin-top:0;}
+#screen-intro h1 span{color:#1A6B3C;}
+.intro-desc{color:#C8C5BB;font-size:14px;line-height:1.65;text-align:center;margin:14px 0 6px;}
+.intro-sub{color:#3A6A4A;font-size:12px;margin-bottom:28px;text-align:center;}
+.intro-sub strong{color:#6BBF8A;}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;margin-bottom:32px;}
+.intro-tag{background:rgba(255,255,255,0.04);border:1px solid rgba(232,230,224,0.12);border-radius:14px;padding:12px 8px;font-size:12px;color:#C8C5BB;text-align:center;}
+#screen-game{align-items:stretch;}
+.game-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.game-counter{color:#3A6A4A;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+.score-badge{background:rgba(107,191,138,0.15);border:1px solid rgba(107,191,138,0.35);border-radius:20px;padding:5px 16px;color:#6BBF8A;font-size:14px;font-weight:800;}
+.progress-bar{background:rgba(255,255,255,0.07);border-radius:3px;height:3px;margin-bottom:22px;}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#1A6B3C,#E8E6E0);transition:width 0.4s ease;}
+.scenario-card{background:rgba(255,255,255,0.04);border:1px solid rgba(232,230,224,0.12);border-left:3px solid #1A6B3C;border-radius:16px;padding:22px;margin-bottom:12px;}
+.scenario-label{display:inline-block;background:rgba(26,107,60,0.35);color:#6BBF8A;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 12px;border-radius:20px;margin-bottom:10px;}
+.scenario-title{color:#E8E6E0;font-size:17px;font-weight:900;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;}
+.scenario-text{color:#C8C5BB;font-size:13px;line-height:1.7;}
+.options{display:flex;flex-direction:column;gap:9px;}
+.opt-btn{width:100%;text-align:left;background:rgba(255,255,255,0.03);border:1px solid rgba(232,230,224,0.1);border-radius:12px;padding:13px 17px;color:#C8C5BB;font-size:13px;cursor:pointer;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:'League Spartan',sans-serif;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:rgba(255,255,255,0.07);border-color:rgba(232,230,224,0.25);color:#E8E6E0;}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.good{background:rgba(26,107,60,0.2);border-color:#1A6B3C;color:#E8E6E0;font-weight:700;}
+.opt-btn.ok{background:rgba(201,168,76,0.15);border-color:#C9A84C;color:#E8E6E0;font-weight:700;}
+.opt-btn.bad{background:rgba(214,59,47,0.15);border-color:#D63B2F;color:#E8E6E0;font-weight:700;}
+.opt-pts{font-weight:900;font-size:15px;white-space:nowrap;}
+.opt-pts.good{color:#6BBF8A;}
+.opt-pts.ok{color:#C9A84C;}
+.opt-pts.bad{color:#E87070;}
+.feedback{border-radius:0 0 8px 8px;padding:10px 17px;color:#94B89E;font-size:12px;line-height:1.6;display:none;}
+.feedback.good{border-left:3px solid #6BBF8A;background:rgba(107,191,138,0.05);}
+.feedback.ok{border-left:3px solid #C9A84C;background:rgba(201,168,76,0.05);}
+.feedback.bad{border-left:3px solid #E87070;background:rgba(214,59,47,0.05);}
+#screen-result{text-align:center;}
+.result-label{color:#3A6A4A;font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-top:14px;}
+.result-emoji{font-size:52px;margin:8px 0 4px;}
+.result-title{font-size:clamp(20px,5vw,32px);font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.result-desc{color:#C8C5BB;font-size:13px;line-height:1.65;margin-bottom:26px;max-width:420px;}
+.score-card{border-radius:16px;padding:20px 36px;text-align:center;margin-bottom:22px;width:100%;}
+.score-big{font-size:52px;font-weight:900;line-height:1;}
+.score-sub{color:#3A6A4A;font-size:12px;margin-top:4px;}
+.score-bar-wrap{background:rgba(255,255,255,0.08);border-radius:3px;height:5px;margin:14px 0 6px;}
+.score-bar-fill{height:100%;border-radius:3px;}
+.score-pct{color:#C8C5BB;font-size:12px;}
+.history-card{width:100%;margin-bottom:22px;}
+.history-label{color:#3A6A4A;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.history-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);gap:12px;}
+.history-row:last-child{border-bottom:none;}
+.h-scenario{color:#3A6A4A;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
+.h-choice{color:#C8C5BB;font-size:12px;margin-top:2px;}
+.h-pts{font-weight:900;font-size:14px;white-space:nowrap;}
+.footer-brand{color:#2A5A3A;font-size:10px;letter-spacing:1px;margin-top:18px;}
+#screen-board{align-items:stretch;}
+.board-title{color:#E8E6E0;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:4px;}
+.board-sub{color:#3A6A4A;font-size:11px;letter-spacing:1px;text-align:center;margin-bottom:20px;}
+.board-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;margin-bottom:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(232,230,224,0.1);}
+.board-row.first{background:rgba(201,168,76,0.15);border-color:#C9A84C;}
+.board-row.second{background:rgba(192,192,192,0.12);border-color:#aaa;}
+.board-row.third{background:rgba(176,141,87,0.12);border-color:#b08d57;}
+.board-pos{font-size:18px;width:28px;text-align:center;}
+.board-name{flex:1;color:#E8E6E0;font-size:14px;font-weight:700;text-transform:uppercase;}
+.board-badge{color:#6BBF8A;font-size:11px;}
+.board-pts{font-size:16px;font-weight:900;color:#6BBF8A;}
+.board-empty{color:#3A6A4A;font-size:13px;text-align:center;padding:32px 0;}
+.btn-board{background:rgba(255,255,255,0.06);color:#E8E6E0;border:1px solid rgba(232,230,224,0.15);border-radius:10px;padding:10px 20px;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:2px;text-transform:uppercase;font-family:'League Spartan',sans-serif;margin-top:10px;width:100%;}
+.btn-board:hover{background:rgba(255,255,255,0.1);}
+.header-board-btn{background:none;border:none;color:#6BBF8A;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:2px;text-transform:uppercase;font-family:'League Spartan',sans-serif;margin-left:auto;}
+.name-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(232,230,224,0.2);border-radius:10px;padding:14px 18px;color:#E8E6E0;font-size:15px;font-family:'League Spartan',sans-serif;font-weight:700;letter-spacing:1px;outline:none;margin-bottom:16px;text-align:center;}
+.name-input::placeholder{color:#3A6A4A;letter-spacing:1px;}
+.name-input:focus{border-color:#6BBF8A;}
+.name-label{color:#3A6A4A;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.player-name-display{color:#6BBF8A;font-size:13px;font-weight:700;margin-bottom:4px;}
+</style>
+</head>
+<body>
+
+<div id="header"><span>🏁 THE MONEY PIT STOP</span><button class="header-board-btn" onclick="show('screen-board')">📊 RANKING</button></div>
+
+<div id="screen-intro" class="screen active">
+  <h1>Financial IQ<br><span>Challenge</span></h1>
+  <p class="intro-desc">Toma <strong>10 decisiones financieras reales</strong> de la vida ucabista. Cada elección revela tu nivel como gestor de tu propio motor económico.</p>
+  <p class="intro-sub">Hasta <strong>300 puntos</strong> · Presupuesto base: $250 · Notas sobre 20</p>
+  <div class="intro-grid">
+    <div class="intro-tag">🎯 10 Escenarios UCAB</div>
+    <div class="intro-tag">💵 Todo en dólares</div>
+    <div class="intro-tag">🏁 Insignia Final</div>
+  </div>
+  <div style="width:100%;margin-bottom:8px;">
+    <div class="name-label">¿Cuál es tu nombre?</div>
+    <input class="name-input" id="playerName" type="text" placeholder="ESCRIBE TU NOMBRE AQUÍ" maxlength="30"/>
+  </div>
+  <button class="btn-main" onclick="startGame()">ENTRAR AL PIT STOP →</button>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="game-topbar">
+    <span class="game-counter" id="counter">Reto 1 / 10</span>
+    <span class="score-badge" id="scoreBadge">+0 pts</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="scenario-card">
+    <span class="scenario-label">Situación · UCAB</span>
+    <div class="scenario-title" id="scenarioTitle"></div>
+    <div class="scenario-text" id="scenarioText"></div>
+  </div>
+  <div class="options" id="optionsContainer"></div>
+  <button class="btn-next" id="btnNext" onclick="nextScenario()">SIGUIENTE →</button>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="result-label">Resultado Final</div>
+  <div class="player-name-display" id="playerNameDisplay"></div>
+  <div class="result-emoji" id="resultEmoji"></div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-desc" id="resultDesc"></div>
+  <div class="score-card card" id="scoreCard">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-sub" id="scoreSub"></div>
+    <div class="score-bar-wrap"><div class="score-bar-fill" id="scoreBarFill"></div></div>
+    <div class="score-pct" id="scorePct"></div>
+  </div>
+  <div class="card history-card">
+    <div class="history-label">Tu historial de decisiones</div>
+    <div id="historyList"></div>
+  </div>
+  <button class="btn-main" onclick="restartGame()">NUEVO PIT STOP</button>
+  <div class="footer-brand">THE MONEY PIT STOP · UCAB · Comunicación Social</div>
+</div>
+
+<div id="screen-board" class="screen">
+  <div class="board-title">🏆 Ranking</div>
+  <div class="board-sub">RESULTADOS EN TIEMPO REAL</div>
+  <div id="boardList"><div class="board-empty">Nadie ha jugado todavía.<br>¡Sé el primero!</div></div>
+  <button class="btn-board" onclick="show(currentScreen())">← VOLVER AL JUEGO</button>
+  <button class="btn-board" style="color:#E87070;border-color:rgba(232,100,100,0.3);margin-top:6px;" onclick="clearBoard()">🗑 BORRAR RESULTADOS</button>
+</div>
+
+<script>
+const S=[
+  {t:"El Primer Arranque",s:"Arrancas el semestre con $250 de presupuesto mensual. Debes cubrir transporte al núcleo Montalbán, fotocopias, comida en el comedor y útiles. ¿Cómo distribuyes el dinero desde el día 1?",o:[{t:"Divido los $250 en categorías fijas antes de gastar un centavo",p:30,f:"¡Pit stop perfecto! Presupuestar antes de gastar es la primera vuelta ganada del semestre."},{t:"Pago primero el transporte y las copias, con lo que sobre me manejo",p:20,f:"Buen instinto de prioridad. Un presupuesto escrito te daría aún más control."},{t:"Gasto la primera semana libremente y ajusto después",p:5,f:"Riesgo real: muchos ucabistas se quedan sin efectivo antes del segundo parcial."},{t:"Guardo todo y le pido a mis papás según lo vaya necesitando",p:-5,f:"Sin administrar tú mismo los $250 no desarrollas el motor económico que la U exige."}]},
+  {t:"La Beca Trabajo",s:"Ganaste una beca trabajo en la UCAB: horas en la biblioteca central a cambio de $120 mensuales. Junto a tu presupuesto sumas $370 este mes. ¿Qué haces con el ingreso extra?",o:[{t:"Lo separo como fondo de imprevistos para el semestre",p:30,f:"¡Excelente! Los imprevistos en la UCAB son reales: parciales extras, materiales, pasajes de emergencia."},{t:"Uso los $120 para comprar los libros y materiales que me faltaban",p:25,f:"Inversión directa en tu rendimiento académico. Muy inteligente."},{t:"Los ahorro sin tocarlos durante todo el semestre",p:20,f:"Disciplina real. Llegar a diciembre con ese fondo intacto es una ventaja enorme."},{t:"Me los gasto celebrando con mis compas de carrera, me lo gané",p:-5,f:"Merecerlo no lo hace inteligente. El semestre apenas comienza."}]},
+  {t:"El Proyecto de Cátedra",s:"Tu grupo de Comunicación Social necesita imprimir y encuadernar un proyecto: $18. Son 6 integrantes y nadie tiene efectivo ahora. ¿Qué propones?",o:[{t:"Cada quien pone $3 esta semana y lo coordinamos en WhatsApp",p:30,f:"¡Liderazgo financiero! Dividir costos con registro previo evita los conflictos clásicos de grupo."},{t:"Lo pago yo y cobro después con nota escrita de quién debe qué",p:20,f:"Generoso, pero el registro es clave. Sin él cobrar entre compañeros puede complicarse."},{t:"Busco una imprenta más barata o uso la sala de computación de la U",p:25,f:"Mentalidad de optimización. La UCAB tiene recursos internos que muchos no explotan."},{t:"Entregamos sin encuadernar para no gastar",p:-10,f:"Puede costarte puntos en la nota. A veces invertir $3 es la decisión más rentable del semestre."}]},
+  {t:"El Comedor vs. Traer Comida",s:"Almorzar en el comedor de la UCAB cuesta $2.50 diarios ($50/mes). Traer comida de casa costaría ~$20/mes. ¿Qué decides?",o:[{t:"Traigo comida y ahorro $30 mensuales para mis materiales",p:30,f:"$30 al mes son $300 en un semestre. Las decisiones pequeñas construyen el presupuesto ganador."},{t:"Como en el comedor 3 días y traigo los otros 2",p:25,f:"Excelente balance. La constancia de este hábito te genera ahorro real sin sacrificar calidad de vida."},{t:"Como en el comedor siempre, el tiempo vale",p:10,f:"Válido si ese tiempo lo usas en estudiar. Pero $30 extras al mes no son poca cosa."},{t:"Como en el comedor porque cocinar es complicado",p:0,f:"Aprender algo básico es una habilidad financiera y de vida que vale desarrollar."}]},
+  {t:"El Libro de Texto Obligatorio",s:"Tu profesor exige un libro de $35 que solo se usa 4 semanas del semestre. ¿Cómo lo consigues?",o:[{t:"Lo busco en la biblioteca de la UCAB o se lo pido a un estudiante de semestres anteriores",p:30,f:"¡Los activos de la UCAB son tuyos! La biblioteca y la red estudiantil son los recursos más subvalorados."},{t:"Busco la versión PDF de acceso libre en repositorios académicos",p:25,f:"Inteligente. Muchos textos están disponibles legalmente en plataformas digitales."},{t:"Lo compro de segunda mano en grupos de WhatsApp de egresados",p:20,f:"Perfecto uso de la red ucabista. Los libros usados pueden costar 60% menos."},{t:"Lo compro nuevo porque quiero subrayarlo",p:5,f:"Para 4 semanas de uso, $35 es alto relativo a tu presupuesto. Explora primero las otras opciones."}]},
+  {t:"El Evento de Integración",s:"La Escuela de Comunicación Social organiza un evento de integración que cuesta $15. No estaba en tu presupuesto. ¿Qué haces?",o:[{t:"Reviso mi presupuesto y reduzco otro gasto esta semana para cubrir los $15",p:30,f:"¡Ajustar el motor en tiempo real! Reasignar presupuesto para una meta específica es finanzas maduras."},{t:"No voy: no está en mi presupuesto y no me endeudo por gastos sociales",p:20,f:"Disciplina real. Mantener límites financieros claros es una fortaleza, no un sacrificio."},{t:"Le pido prestado a un compañero y lo devuelvo la próxima semana",p:10,f:"Manejable si cumples el plazo. Las deudas pequeñas sin fecha exacta erosionan la confianza."},{t:"Le pido a mis papás sin decirles para qué es",p:-5,f:"Opacidad financiera desde temprano: una señal de alerta para tu futuro económico."}]},
+  {t:"El Trabajo de Medio Tiempo",s:"Te ofrecen trabajo en una agencia digital cercana a la UCAB: $180/mes, pero reduces horas de estudio. Tu promedio es 14/20. ¿Aceptas?",o:[{t:"Acepto y creo horario estricto para proteger mis horas de estudio",p:30,f:"¡Equilibrio ganador! Ingreso + disciplina horaria es una combinación que pocos estudiantes logran."},{t:"Acepto solo si es en comunicaciones o marketing, que suma experiencia",p:30,f:"Perfecto. Combinar experiencia relevante con ingresos multiplica el valor de cada hora trabajada."},{t:"Rechazo por ahora: mi foco es subir el promedio este semestre",p:15,f:"Válido si tienes los recursos cubiertos. Un promedio de 16+ abre puertas importantes."},{t:"Acepto sin pensar en el impacto sobre mis notas",p:0,f:"Sin planificación, el trabajo puede bajar el promedio y costarte más caro a largo plazo."}]},
+  {t:"El Laptop Dañado",s:"Tu laptop se daña antes de los parciales. Reparación: $60. Laptop nueva básica: $180. Tienes $90 ahorrados. ¿Qué decides?",o:[{t:"Reparo el laptop ($60) y conservo $30 de reserva para el cierre de semestre",p:30,f:"¡Decisión óptima! Reparar cuesta menos, mantienes colchón, y el laptop nuevo puede esperar."},{t:"Uso las salas de computación de la UCAB mientras ahorro para una laptop nueva",p:25,f:"Excelente uso de la infraestructura ucabista. Sacrificio temporal con visión de futuro."},{t:"Compro la nueva con mis $90 y pago los $90 restantes en cuotas a un familiar",p:15,f:"Razonable si las condiciones con el familiar son claras y tienes plan de pago definido."},{t:"Compro la nueva con tarjeta de crédito y ya veré cómo pago",p:-15,f:"Sin plan, los intereses pueden convertir $180 en $260+. Nunca te endeudes sin estrategia."}]},
+  {t:"Las Suscripciones Olvidadas",s:"Encuentras 3 suscripciones activas que suman $22/mes y casi no usas. Representan el 9% de tu presupuesto mensual. ¿Qué haces?",o:[{t:"Cancelo todas y evalúo cuáles necesito antes de reactivar alguna",p:30,f:"$22 mensuales son $264 al año. Auditar suscripciones es uno de los hábitos más poderosos."},{t:"Cancelo las que no uso y conservo máximo 1 que sí aprovecho",p:25,f:"Muy práctico. Optimizar en lugar de eliminar todo es un enfoque sostenible."},{t:"Comparto las cuentas con compañeros para dividir el costo",p:20,f:"Inteligente. Compartir suscripciones puede bajar el costo individual hasta un 75%."},{t:"Las dejo porque cancelar es engorroso y no es tanto dinero",p:-10,f:"$22 mensuales son $264 anuales gastados en nada. El costo hormiga es real."}]},
+  {t:"La Semana de la UCAB",s:"Se acerca la Semana de la UCAB y los gastos opcionales (actividades, cenas de carrera, camiseta de facultad) sumarán ~$40 extra. ¿Cómo te preparas?",o:[{t:"Desde 4 semanas antes aparto $10 semanales para esa semana",p:30,f:"¡Planificación de pit stop! Anticipar gastos predecibles y ahorrar por etapas es finanzas de alto rendimiento."},{t:"Elijo solo las actividades que más me importan y fijo tope de $20",p:25,f:"Priorización inteligente. Disfrutar con límite es más sostenible que privarse o gastar sin control."},{t:"Espero que mis papás cubran esos gastos extra",p:5,f:"Puede funcionar, pero depender de terceros para gastos propios frena tu autonomía financiera."},{t:"Gasto lo que haga falta y ajusto el presupuesto el mes siguiente",p:-5,f:"Para un gasto 100% predecible con semanas de anticipación, improvisar es la peor estrategia."}]}
+];
+
+const badges=[
+  {min:-999,max:50,title:"Motor en Frío",emoji:"🔧",color:"#B8BFC8",desc:"Vas arrancando. Con cada decisión afinas tu motor económico ucabista."},
+  {min:51,max:120,title:"Rookie del Campus",emoji:"🏎️",color:"#C9A84C",desc:"Tienes bases sólidas. Sigue calibrando hábitos de presupuesto en la U."},
+  {min:121,max:190,title:"Piloto Ucabista",emoji:"🏁",color:"#4A9EFF",desc:"Tomas decisiones inteligentes. Tu motor económico está bien afinado."},
+  {min:191,max:250,title:"Estratega de Pista",emoji:"🏆",color:"#1A6B3C",desc:"Excelente juicio. Optimizas recursos y evitas las trampas del campus."},
+  {min:251,max:999,title:"The Money Pit Stop MVP",emoji:"💎",color:"#E8E6E0",desc:"¡Dominas las finanzas universitarias! Eres el ingeniero de tu propia estabilidad."}
+];
+
+let cur=0,score=0,hist=[],playerName="Jugador";
+
+function getBadge(s){return badges.find(b=>s>=b.min&&s<=b.max)||badges[0];}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function startGame(){
+  const nameInput=document.getElementById('playerName');
+  playerName=nameInput?nameInput.value.trim()||'Jugador':'Jugador';
+  cur=0;score=0;hist=[];render();show('screen-game');
+}
+
+function render(){
+  const sc=S[cur];
+  document.getElementById('counter').textContent=`Reto ${cur+1} / ${S.length}`;
+  document.getElementById('scoreBadge').textContent=`${score>=0?'+':''}${score} pts`;
+  document.getElementById('progressFill').style.width=`${(cur/S.length)*100}%`;
+  document.getElementById('scenarioTitle').textContent=sc.t;
+  document.getElementById('scenarioText').textContent=sc.s;
+  document.getElementById('btnNext').style.display='none';
+  const c=document.getElementById('optionsContainer');
+  c.innerHTML='';
+  sc.o.forEach(opt=>{
+    const w=document.createElement('div');
+    const b=document.createElement('button');
+    b.className='opt-btn';
+    b.innerHTML=`<span>${opt.t}</span>`;
+    b.onclick=()=>pick(opt,w,b);
+    w.appendChild(b);
+    const fb=document.createElement('div');
+    fb.className='feedback';
+    fb.textContent=opt.f;
+    w.appendChild(fb);
+    c.appendChild(w);
+  });
+}
+
+function pick(opt,w,b){
+  document.querySelectorAll('.opt-btn').forEach(x=>x.disabled=true);
+  const cls=opt.p>=20?'good':opt.p>=5?'ok':'bad';
+  b.classList.add(cls);
+  const sp=document.createElement('span');
+  sp.className=`opt-pts ${cls}`;
+  sp.textContent=`${opt.p>0?'+':''}${opt.p}`;
+  b.appendChild(sp);
+  const fb=w.querySelector('.feedback');
+  fb.classList.add(cls);
+  fb.style.display='block';
+  score+=opt.p;
+  hist.push({t:S[cur].t,c:opt.t,p:opt.p});
+  document.getElementById('scoreBadge').textContent=`${score>=0?'+':''}${score} pts`;
+  const bn=document.getElementById('btnNext');
+  bn.style.display='block';
+  bn.textContent=cur+1>=S.length?'VER RESULTADO FINAL →':'SIGUIENTE DECISIÓN →';
+}
+
+function nextScenario(){
+  if(cur+1>=S.length){showResult();return;}
+  cur++;
+  const g=document.getElementById('screen-game');
+  g.style.opacity='0';g.style.transition='opacity 0.25s';
+  setTimeout(()=>{render();g.style.opacity='1';},260);
+}
+
+function showResult(){
+  const badge=getBadge(score);
+  const max=S.length*30;
+  const pct=Math.max(0,Math.min(100,Math.round((score/max)*100)));
+  document.getElementById('resultEmoji').textContent=badge.emoji;
+  const nd=document.getElementById('playerNameDisplay');if(nd)nd.textContent=playerName.toUpperCase();
+  document.getElementById('resultTitle').style.color=badge.color;
+  document.getElementById('resultTitle').textContent=badge.title;
+  document.getElementById('resultDesc').textContent=badge.desc;
+  const sc=document.getElementById('scoreCard');
+  sc.style.border=`2px solid ${badge.color}`;
+  document.getElementById('scoreBig').style.color=badge.color;
+  document.getElementById('scoreBig').textContent=score;
+  document.getElementById('scoreSub').textContent=`de ${max} puntos posibles`;
+  document.getElementById('scoreBarFill').style.cssText=`background:linear-gradient(90deg,${badge.color},#E8E6E0);width:${pct}%;height:100%;border-radius:3px;`;
+  document.getElementById('scorePct').textContent=`${pct}% de rendimiento`;
+  const list=document.getElementById('historyList');
+  list.innerHTML='';
+  hist.forEach((h,i)=>{
+    const col=h.p>=20?'#6BBF8A':h.p>=5?'#C9A84C':'#E87070';
+    const br=i<hist.length-1?'border-bottom:1px solid rgba(255,255,255,0.05)':'';
+    list.innerHTML+=`<div class="history-row" style="${br}"><div><div class="h-scenario">${h.t}</div><div class="h-choice">${h.c}</div></div><div class="h-pts" style="color:${col}">${h.p>0?'+':''}${h.p}</div></div>`;
+  });
+  addToLeaderboard(playerName, score, badge.emoji+' '+badge.title);
+  show('screen-result');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartGame(){startGame();}
+
+let leaderboard=[];
+
+function currentScreen(){
+  const screens=['screen-intro','screen-game','screen-result'];
+  for(const s of screens){if(document.getElementById(s).classList.contains('active'))return s;}
+  return 'screen-intro';
+}
+
+function addToLeaderboard(name,pts,badge){
+  leaderboard.push({name,pts,badge,time:new Date().toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'})});
+  leaderboard.sort((a,b)=>b.pts-a.pts);
+  renderBoard();
+}
+
+function renderBoard(){
+  const list=document.getElementById('boardList');
+  if(!leaderboard.length){list.innerHTML='<div class="board-empty">Nadie ha jugado todavía.<br>¡Sé el primero!</div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  const rowClass=['first','second','third'];
+  list.innerHTML=leaderboard.map((p,i)=>`
+    <div class="board-row ${rowClass[i]||''}">
+      <div class="board-pos">${medals[i]||`#${i+1}`}</div>
+      <div>
+        <div class="board-name">${p.name}</div>
+        <div class="board-badge">${p.badge} · ${p.time}</div>
+      </div>
+      <div class="board-pts">${p.pts>0?'+':''}${p.pts}</div>
+    </div>`).join('');
+}
+
+function clearBoard(){
+  if(confirm('¿Borrar todos los resultados?')){leaderboard=[];renderBoard();}
+}
+</script>
+</body>
+</html>
